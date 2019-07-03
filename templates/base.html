@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Neighborhood Map Project</title>
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'css/bootstrap/bootstrap.min.css') }}">
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'css/style.css') }}">
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename = 'fontawesome/css/all.min.css') }}">
+	<script type="text/javascript" src="{{ url_for('static', filename = 'js/jquery-3.4.1.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename = 'js/knockout-3.5.0.js') }}"></script>
+
+</head>
+<body>
+	<header>
+		<h3>My Neighborhood Map Project</h3>
+	</header>
+
+{% block content %}{% endblock %}
+
+
+	<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDgwqYHWHrUhlQlr9k4qlLfZJ6oH0IwGcQ&callback=initMap"
+  type="text/javascript" onerror="onErrorMap()"></script>
+
+  <script src="http://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyDgwqYHWHrUhlQlr9k4qlLfZJ6oH0IwGcQ"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename = 'js/wikiApi.js') }}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename = 'js/myFunctions.js') }}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename = 'js/bootstrap/bootstrap.min.js') }}"></script>
+	<script type="text/javascript" src="{{ url_for('static', filename = 'js/app_v2.js') }}"></script>
+</body>
+</html>

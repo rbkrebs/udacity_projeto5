@@ -1,0 +1,73 @@
+{%extends "base.html"%}
+
+{%block content %}
+
+
+	<div id="mySidebar" class="sidebar">
+		<div class="input-group">
+		  <input type="text" class="form-control" data-bind='textInput: searchplace'>
+		  <div class="input-group-append">
+		    <button type="button" class="btn btn-outline-secondary">Filter<i class="far fa-filter"></i></button>
+
+		</div>
+	</div>
+
+		<ul data-bind="foreach: markerList">
+			<li class="text-white" data-bind="visible: visible, text: title, click: $parent.setMarker"></li>
+		</ul>
+	</div>
+	<nav id="nav" class="navbar navbar-dark bg-dark">
+		<button class="slide-toggle navbar-toggler" onclick="collapse()"><span class="navbar-toggler-icon"></span>
+    	</button>
+    </nav>
+
+	<section id="sectionMap">
+<!--
+		<div data-bind="with:currentMarker">
+			<div data-bind="foreach: $parent.filteredMarkers">
+				<h2 data-bind="text:favorite"></h2>
+				<h2 data-bind="text:title"></h2>
+			</div>
+		</div>
+-->
+	 	<div id="map"></div>
+	</section>
+
+	<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Marker Info</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form >
+                <div class="form-group">
+                  <label for="recipient-name" class="col-form-label">Give a title:</label>
+                  <input type="text" class="form-control" name="title" id="recipient-name" required>
+                </div>
+                <div class="form-group">
+    	          <div class="custom-control custom-switch">
+          			  <input type="checkbox" name="favorite" class="custom-control-input" id="customSwitch1" >
+          			  <label class="custom-control-label" for="customSwitch1">Add to Favorites</label>
+          			</div>
+          		  </div>
+                <div class="form-group">
+                  <label for="message-text" class="col-form-label">Add some information about:</label>
+                  <textarea class="form-control" name="info_window" id="message-text" required  ></textarea>
+                </div>
+                <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+              <button type="submit" value="Submit" class="btn btn-primary">Add</button>
+            </div>
+            </form>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+
+{% endblock %}
