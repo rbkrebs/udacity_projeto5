@@ -4,6 +4,9 @@ var client_secret = "SI1IQROTUGGYHDIONY5VQTEJPJNFXISJ3ZW0LJQYN3VJQXT3";
 var versionFSQ = "20180323";
 var myLocal = "-30.034632,-51.217699";
 var map;
+var datawk;
+var urlIcon = 'http://maps.google.com/mapfiles/ms/icons/'
+
 //this is the model for any marker on the map
 var Marker = function(data, map, infowindow, bounds){
 	var self = this;
@@ -17,13 +20,20 @@ var Marker = function(data, map, infowindow, bounds){
 	var fsqPlaces = getJsonValues("https://api.foursquare.com/v2/venues/search?client_id="+client_id+"&client_secret="+client_secret+"&v="+versionFSQ+"&ll="+self.lat+","+self.lng+"&limit=10&intent=browse;'","json");
 	var wikipedia = getJsonValues("https://en.wikipedia.org/w/api.php?action=query&list=geosearch&gscoord="+self.lat+"|"+self.lng+"&gsradius=10&gslimit=50&format=json&origin=*", "json");
 	datafq = fsqPlaces.response.venues;
+	//check if request to wikipedia API return any value
+	if(wikipedia.query.geosearch.length==0){
+		datawk = "";
+	}else{
+		datawk = wikipedia.query.geosearch[0].title;
+	}
 
-	datawk = wikipedia.query.geosearch[0].title;
 	self.infos = [datawk, datafq, self.favorite, self.info_window];
-	var icon = {url: "http://maps.google.com/mapfiles/ms/icons/red-dot.png"};
 
-	if(self.favorite==='True'){
-		icon = {url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"};
+	//change icon color base on favorite feature
+	if(self.favorite==true){
+		icon = {url: urlIcon+'blue-dot.png'};
+	}else{
+		icon = {url: urlIcon+'red-dot.png'};
 	}
 
 	self.marker = new google.maps.Marker({
@@ -46,8 +56,10 @@ var Marker = function(data, map, infowindow, bounds){
 				 		this.setAnimation(null);
 				 	});
 };
-
+//create a new marker on click event
 function createMarker(event){
+
+	var marker;
 
 	if (confirm('Are you sure you want to save this thing into the database?')) {
 		  		//get the latitude and longitude of the clicked region
@@ -76,7 +88,7 @@ function createMarker(event){
     				formJson['lat'] = lat;
     				formJson['lng'] = lng;
     				//save on database
-			   		setJsonLocal(formJson, map, infowindow, bounds);
+			   		marker = setJsonLocal(formJson);
 
 				  $('#exampleModal').modal('toggle');
 				  //clean all the inputs
@@ -88,16 +100,36 @@ function createMarker(event){
 				});
 
 			}
+			return marker;
 
 }
+//to save data on database
+function setJsonLocal(data){
 
+	var data = data;
+	var marker;
+		$.ajax(
+				{
+					method: 'POST',
+				    url: "/templates/save_maker/JSON" ,
+				    dataType: "json",
+				    async: false,
+				    data:  data,
+				    success: function(response)
+				    {
 
+				    	marker = response;
+
+				    }
+	});
+		return marker;
+}
 
 //handle when maps API does not work
 function onErrorMap() {
 	alert('There was an error occured with the Google Maps. Please try again later.');
 	};
-
+//to get values from APIs
 function getJsonValues(url, dataType){
 	var data;
 		$.ajax(
@@ -114,6 +146,8 @@ function getJsonValues(url, dataType){
 	}
 
 function populateInfoWindow(marker, infowindow, infos ){
+	//Check if wikipedia API found some information. This is in case a user create a new marker.
+	var link = (infos[0].length > 0) ? '<a href="https://en.wikipedia.org/wiki/'+infos[0]+'" target="_blank">Read more on Wikipedia...</a>':'';
 
 
 				if (infowindow.marker != marker){
@@ -123,9 +157,8 @@ function populateInfoWindow(marker, infowindow, infos ){
 									      	'<h6>Address: '+ infos[1][0].location.address+'</h6>'+
 									        '<h6>Category: '+ infos[1][1].categories[0].shortName+'</h6>'+
 									        '<h6>Particular Information: '+ infos[3]+'</h6>'+
-									        '<a href="https://en.wikipedia.org/wiki/'+infos[0]+'" target="_blank">'+
-									        'Read more on Wikipedia...</a>'+
-											'</div>');
+									        link+
+									       	'</div>');
 					infowindow.open(map, marker);
 					infowindow.addListener('closeclick', function(){
 						infowindow.setMarker = null;
@@ -135,14 +168,10 @@ function populateInfoWindow(marker, infowindow, infos ){
 			}
 
 
-
-
-
-
-
 var ViewModel = function(){
 
 	var self = this;
+
 
 	this.markerList = ko.observableArray();
 	// The location of Home
@@ -153,9 +182,11 @@ var ViewModel = function(){
 
 	var infowindow = new google.maps.InfoWindow();
 	var bounds = new google.maps.LatLngBounds();
-
+	//i am trying to implement a way to save a marker after click event
 	google.maps.event.addListener(map, 'click', function(event){
-		createMarker(event);
+		console.log(self.markerList());
+		self.markerList().push(new Marker(createMarker(event), map, infowindow, bounds));
+
 	});
 
 	//add the saved places to the observablearray witch is responsable to populate de menu filter
@@ -164,7 +195,6 @@ var ViewModel = function(){
 	for(var i = 0; i < savedPlaces.length; i ++){
   		this.markerList().push(new Marker(savedPlaces[i], map, infowindow, bounds));
 	}
-
 
 	this.currentMarker = ko.observable(this.markerList());
 
